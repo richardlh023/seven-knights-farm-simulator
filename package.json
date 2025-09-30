@@ -1,5 +1,19 @@
 {
+  "name": "seven-knights-farm-simulator",
+  "version": "1.0.0",
+  "description": "Seven Knights: Rebirth Farm Simulator - A web-based tool for calculating farming efficiency",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "node app.js"
+  },
   "dependencies": {
     "express": "^5.1.0"
-  }
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "keywords": ["seven-knights", "farming", "simulator", "game", "calculator"],
+  "author": "richardlh023",
+  "license": "MIT"
 }
