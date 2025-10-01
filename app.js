@@ -152,14 +152,7 @@ app.get("/", (_req, res) => {
                   <option value="1060">แผนที่ 11-1 (1060 EXP)</option>
                   <option value="1090">แผนที่ 12-1 (1090 EXP)</option>
                   <option value="1120">แผนที่ 13-1 (1120 EXP)</option>
-                  <option value="1150">แผนที่ 14-1 (1150 EXP)</option>
-                  <option value="1180">แผนที่ 15-1 (1180 EXP)</option>
-                  <option value="1210">แผนที่ 16-1 (1210 EXP)</option>
-                  <option value="1240" selected>แผนที่ 17-1 (1240 EXP)</option>
-                  <option value="1270">แผนที่ 18-1 (1270 EXP)</option>
-                  <option value="1300">แผนที่ 19-1 (1300 EXP)</option>
-                  <option value="1330">แผนที่ 20-1 (1330 EXP)</option>
-                  <option value="1360">แผนที่ 21-1 (1360 EXP)</option>
+                  <option value="1150" selected>แผนที่ 14-1 (1150 EXP)</option>
                 </optgroup>
                 <!-- Nightmare Mode Maps -->
                 <optgroup label="โหมด Nightmare">
@@ -280,7 +273,7 @@ app.get("/", (_req, res) => {
     const data = {
       keysBase: toNumber(f.keysBase.value, 0),
       keysPerRound: keysPerRound,
-      expPerRound: toNumber(f.expPerRound.value, 1360),
+      expPerRound: toNumber(f.expPerRound.value, 1150),
       heroesPerRound: heroesPerRound,
       expToLv30: ${DEFAULTS.expToLv30},
 
@@ -386,7 +379,7 @@ app.get("/", (_req, res) => {
   // Presets
   document.getElementById('presetNormal').addEventListener('click', ()=>{
     const f = document.getElementById('form');
-    f.expPerRound.value = '1240'; // Map 17-1 Normal
+    f.expPerRound.value = '1150'; // Map 14-1 Normal
     runCalc();
   });
   document.getElementById('presetNightmare').addEventListener('click', ()=>{
