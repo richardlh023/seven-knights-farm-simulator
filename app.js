@@ -11,101 +11,101 @@ app.use(express.urlencoded({ extended: true }));
 /** ---- Domain constants ---- */
 const SECS_PER_DAY = 24 * 60 * 60;
 const DEFAULTS = {
-    expToLv30: 12480,          // EXP รวมจาก Lv1 -> Lv30
-    rubyPerHeroLv30: 20,       // รูบี้/ฮีโร่เวล 30
-    keyRegenIntervalSec: 180,  // ฟื้น 1 คีย์ ทุก 3 นาที (ฐาน)
-    keyPackReduceSec: 60,      // แพ็คลดเวลาฟื้นคีย์ 60 วิ
+  expToLv30: 12480,          // EXP รวมจาก Lv1 -> Lv30
+  rubyPerHeroLv30: 20,       // รูบี้/ฮีโร่เวล 30
+    keyRegenIntervalSec: 180,  // ฟื้น 1 กุญแจ ทุก 3 นาที (ฐาน)
+    keyPackReduceSec: 60,      // แพ็คลดเวลาฟื้นกุญแจ 60 วิ
 };
 
 /** Core simulate */
 function simulate({
-    keysBase = 0,                // คีย์ที่มีเริ่มต้น
-    keysPerRound = 6,           // คีย์/รอบ (ด่านปกติ 6, ด่านพิเศษ 12)
-    expPerRound = 1250,         // EXP/รอบ
-    heroesPerRound = 4,         // จำนวนฮีโร่ที่ปั้นพร้อมกัน/รอบ
-    expToLv30 = DEFAULTS.expToLv30,
-    rubyPerHeroLv30 = DEFAULTS.rubyPerHeroLv30,
+    keysBase = 0,                // กุญแจที่มีเริ่มต้น
+    keysPerRound = 6,           // กุญแจ/รอบ (ด่านปกติ 6, ด่านพิเศษ 12)
+  expPerRound = 1250,         // EXP/รอบ
+  heroesPerRound = 4,         // จำนวนฮีโร่ที่ปั้นพร้อมกัน/รอบ
+  expToLv30 = DEFAULTS.expToLv30,
+  rubyPerHeroLv30 = DEFAULTS.rubyPerHeroLv30,
 
-    // ซื้อแพ็กคีย์
+    // ซื้อแพ็กกุญแจ
     buy50Times = 0,             // 0–20
     buy80Times = 0,             // 0–50
     buy100Times = 0,            // 0–50
 
-    // แพ็ครายเดือนแบบติ๊ก
-    hasMonthlyExp10 = false,    // EXP +10%
-    hasMonthlyKeyMinus60 = false, // ลดเวลาฟื้นคีย์ 60 วิ
+  // แพ็ครายเดือนแบบติ๊ก
+  hasMonthlyExp10 = false,    // EXP +10%
+    hasMonthlyKeyMinus60 = false, // ลดเวลาฟื้นกุญแจ 60 วิ
 
     // ตั้งค่าระยะเวลาฟื้น (กรณีอยากลองค่าอื่น)
     baseKeyRegenIntervalSec = DEFAULTS.keyRegenIntervalSec,
 
-    // เวลาเฉลี่ย/รอบ
-    avgTimePerRound = 30,       // วินาที/รอบ
+  // เวลาเฉลี่ย/รอบ
+  avgTimePerRound = 30,       // วินาที/รอบ
 }) {
-    // 1) Effective EXP/round (แพ็ค EXP +10%)
-    const effectiveExpPerRound = expPerRound * (1 + (hasMonthlyExp10 ? 0.10 : 0));
+  // 1) Effective EXP/round (แพ็ค EXP +10%)
+  const effectiveExpPerRound = expPerRound * (1 + (hasMonthlyExp10 ? 0.10 : 0));
 
-    // 2) รอบที่ต้องใช้จนเลเวล 30 (ปัดขึ้น)
-    const roundsToLv30 = Math.max(1, Math.ceil(expToLv30 / effectiveExpPerRound));
+  // 2) รอบที่ต้องใช้จนเลเวล 30 (ปัดขึ้น)
+  const roundsToLv30 = Math.max(1, Math.ceil(expToLv30 / effectiveExpPerRound));
 
-    // 3) คีย์ฟรีต่อวันจากการฟื้น (มีผลจากแพ็คลด 60 วิ)
+    // 3) กุญแจฟรีต่อวันจากการฟื้น (มีผลจากแพ็คลด 60 วิ)
     const regenInterval =
         Math.max(1, baseKeyRegenIntervalSec - (hasMonthlyKeyMinus60 ? DEFAULTS.keyPackReduceSec : 0));
     const dailyKeysFromRegen = Math.floor(SECS_PER_DAY / regenInterval);
 
-    // 4) คีย์จากการซื้อแพ็ก
-    const keysFrom50 = 60 * Math.max(0, Math.min(20, buy50Times));
-    const keysFrom80 = 60 * Math.max(0, Math.min(50, buy80Times));
-    const keysFrom100 = 60 * Math.max(0, Math.min(50, buy100Times));
-    const rubyCost = 50 * Math.max(0, Math.min(20, buy50Times)) + 80 * Math.max(0, Math.min(50, buy80Times)) + 100 * Math.max(0, Math.min(50, buy100Times));
+    // 4) กุญแจจากการซื้อแพ็ก
+  const keysFrom50 = 60 * Math.max(0, Math.min(20, buy50Times));
+  const keysFrom80 = 60 * Math.max(0, Math.min(50, buy80Times));
+  const keysFrom100 = 60 * Math.max(0, Math.min(50, buy100Times));
+  const rubyCost = 50 * Math.max(0, Math.min(20, buy50Times)) + 80 * Math.max(0, Math.min(50, buy80Times)) + 100 * Math.max(0, Math.min(50, buy100Times));
 
-    // 5) คีย์รวมวันนี้
+    // 5) กุญแจรวมวันนี้
     const totalKeys = keysBase + dailyKeysFromRegen + keysFrom50 + keysFrom80 + keysFrom100;
 
-    // 6) คำนวณรอบ / ชุดปั้น
-    const totalRounds = Math.floor(totalKeys / keysPerRound);
-    const fullSets = Math.floor(totalRounds / roundsToLv30); // 1 ชุด = ปั้นครบ Lv30 สำหรับ heroesPerRound ตัว
+  // 6) คำนวณรอบ / ชุดปั้น
+  const totalRounds = Math.floor(totalKeys / keysPerRound);
+  const fullSets = Math.floor(totalRounds / roundsToLv30); // 1 ชุด = ปั้นครบ Lv30 สำหรับ heroesPerRound ตัว
 
-    // 7) ผลลัพธ์จากฮีโร่เวล 30
-    const heroesLv30 = fullSets * heroesPerRound;
-    const rubyFromHeroes = heroesLv30 * rubyPerHeroLv30;
+  // 7) ผลลัพธ์จากฮีโร่เวล 30
+  const heroesLv30 = fullSets * heroesPerRound;
+  const rubyFromHeroes = heroesLv30 * rubyPerHeroLv30;
 
-    // 8) กำไรสุทธิ
-    const profit = rubyFromHeroes - rubyCost;
+  // 8) กำไรสุทธิ
+  const profit = rubyFromHeroes - rubyCost;
 
-    // 9) คงเหลือ
-    const roundsUsed = fullSets * roundsToLv30;
-    const keysUsed = roundsUsed * keysPerRound;
-    const keysLeft = totalKeys - keysUsed;
-    const roundsLeft = totalRounds - roundsUsed;
+  // 9) คงเหลือ
+  const roundsUsed = fullSets * roundsToLv30;
+  const keysUsed = roundsUsed * keysPerRound;
+  const keysLeft = totalKeys - keysUsed;
+  const roundsLeft = totalRounds - roundsUsed;
 
-    // 10) เวลารวมที่ใช้
-    const totalTimeSeconds = roundsUsed * avgTimePerRound;
-    const totalTimeMinutes = totalTimeSeconds / 60;
-    const totalTimeHours = totalTimeMinutes / 60;
+  // 10) เวลารวมที่ใช้
+  const totalTimeSeconds = roundsUsed * avgTimePerRound;
+  const totalTimeMinutes = totalTimeSeconds / 60;
+  const totalTimeHours = totalTimeMinutes / 60;
 
-    return {
-        effectiveExpPerRound,
-        roundsToLv30,
-        regenInterval,
-        dailyKeysFromRegen,
-        totalKeys,
-        totalRounds,
-        fullSets,
-        heroesLv30,
-        rubyFromHeroes,
-        rubyCost,
-        profit,
-        keysUsed,
-        keysLeft,
-        roundsLeft,
-        totalTimeSeconds,
-        totalTimeMinutes,
-        totalTimeHours,
-    };
+  return {
+    effectiveExpPerRound,
+    roundsToLv30,
+    regenInterval,
+    dailyKeysFromRegen,
+    totalKeys,
+    totalRounds,
+    fullSets,
+    heroesLv30,
+    rubyFromHeroes,
+    rubyCost,
+    profit,
+    keysUsed,
+    keysLeft,
+    roundsLeft,
+    totalTimeSeconds,
+    totalTimeMinutes,
+    totalTimeHours,
+  };
 }
 
 app.get("/", (_req, res) => {
-    res.send(`<!doctype html>
+  res.send(`<!doctype html>
 <html lang="th">
 <head>
 <meta charset="utf-8" />
@@ -124,7 +124,7 @@ app.get("/", (_req, res) => {
 <body class="min-h-screen">
   <div class="max-w-6xl mx-auto p-6">
     <h1 class="text-3xl font-bold mb-2">Seven Knights: Rebirth — Farm Simulator</h1>
-    <p class="text-gray-300 mb-6">จำลองการฟาร์มออโต้โดยอิงกฎคีย์/EXP/ฮีโร่ Lv30 และแพ็ครายเดือน (ติ๊กเพื่อเปิดผล)</p>
+    <p class="text-gray-300 mb-6">จำลองการฟาร์มออโต้โดยอิงกฎกุญแจ/EXP/ฮีโร่ Lv30 และแพ็ครายเดือน (ติ๊กเพื่อเปิดผล)</p>
 
     <div class="grid md:grid-cols-2 gap-6">
       <!-- CONFIG -->
@@ -132,7 +132,7 @@ app.get("/", (_req, res) => {
         <h2 class="text-xl font-bold mb-3">ตั้งค่าการฟาร์ม</h2>
         <form id="form" class="space-y-3">
           <div class="grid grid-cols-2 gap-3">
-            <label>คีย์เริ่มต้น (มีติดตัว)
+            <label>กุญแจเริ่มต้น (มีติดตัว)
               <input class="w-full p-2 rounded" type="number" name="keysBase" value="0" min="0">
             </label>
             <label>แผนที่ (EXP/รอบ)
@@ -164,7 +164,7 @@ app.get("/", (_req, res) => {
             <label>EXP รวมถึง Lv30
               <div class="w-full p-2 rounded bg-gray-700 text-white border border-gray-600">${DEFAULTS.expToLv30}</div>
             </label>
-            <label>ช่วงเวลาฟื้นคีย์ (วินาที)
+            <label>ช่วงเวลาฟื้นกุญแจ (วินาที)
               <div class="w-full p-2 rounded bg-gray-700 text-white border border-gray-600">${DEFAULTS.keyRegenIntervalSec}</div>
             </label>
             <label>เวลาเฉลี่ย/รอบ (วินาที)
@@ -174,7 +174,7 @@ app.get("/", (_req, res) => {
 
           <hr class="my-4 border-gray-700">
 
-          <h3 class="font-semibold">ช่วงเวลาฟาร์ม (สำหรับคำนวณคีย์ฟื้น)</h3>
+          <h3 class="font-semibold">ช่วงเวลาฟาร์ม (สำหรับคำนวณกุญแจฟื้น)</h3>
           <div class="grid grid-cols-2 gap-3">
             <label>เริ่มฟาร์มเวลา
               <input class="w-full p-2 rounded" type="time" name="farmStartTime" value="07:00">
@@ -186,15 +186,15 @@ app.get("/", (_req, res) => {
 
           <hr class="my-4 border-gray-700">
 
-          <h3 class="font-semibold">ซื้อคีย์ด้วยรูบี้</h3>
+          <h3 class="font-semibold">ซื้อกุญแจด้วยรูบี้</h3>
           <div class="grid grid-cols-1 gap-3">
-            <label>แพ็ก 50 ruby × <span class="text-gray-400">(0–20)</span>
+            <label>กล่องกุญแจ 50 ruby × <span class="text-gray-400">(0–20)</span>
               <input class="w-full p-2 rounded" type="number" name="buy50Times" value="0" min="0" max="20">
             </label>
-            <label>แพ็ก 80 ruby × <span class="text-gray-400">(0–50)</span>
+            <label>กล่องกุญแจ 80 ruby × <span class="text-gray-400">(0–50)</span>
               <input class="w-full p-2 rounded" type="number" name="buy80Times" value="0" min="0" max="50">
             </label>
-            <label>แพ็ก 100 ruby × <span class="text-gray-400">(0–50)</span>
+            <label>กล่องกุญแจ 100 ruby × <span class="text-gray-400">(0–50)</span>
               <input class="w-full p-2 rounded" type="number" name="buy100Times" value="0" min="0" max="50">
             </label>
           </div>
@@ -208,7 +208,7 @@ app.get("/", (_req, res) => {
           </label>
           <label class="flex items-center gap-2">
             <input type="checkbox" name="hasMonthlyKeyMinus60">
-            <span>ลดเวลาฟื้นคีย์ 60 วินาที (3 นาที → 2 นาที)</span>
+            <span>ลดเวลาฟื้นกุญแจ 60 วินาที (3 นาที → 2 นาที)</span>
           </label>
 
           <div class="flex items-center gap-3 mt-4">
@@ -225,15 +225,15 @@ app.get("/", (_req, res) => {
         <div class="grid md:grid-cols-2 gap-3">
           <div class="stat"><div class="text-gray-400 text-sm">EXP/รอบ (หลังบัฟ)</div><div id="effExp" class="text-2xl font-bold">—</div></div>
           <div class="stat"><div class="text-gray-400 text-sm">รอบที่ต้องใช้จน Lv30</div><div id="roundsToLv30" class="text-2xl font-bold">—</div></div>
-          <div class="stat"><div class="text-gray-400 text-sm">คีย์ฟรี/วัน (จากการฟื้น)</div><div id="dailyKeys" class="text-2xl font-bold">—</div></div>
-          <div class="stat"><div class="text-gray-400 text-sm">คีย์ฟื้นในช่วงเวลาที่เลือก</div><div id="periodKeys" class="text-2xl font-bold">—</div></div>
-          <div class="stat"><div class="text-gray-400 text-sm">คีย์รวมวันนี้</div><div id="totalKeys" class="text-2xl font-bold">—</div></div>
+          <div class="stat"><div class="text-gray-400 text-sm">กุญแจฟรี/วัน (จากการฟื้น)</div><div id="dailyKeys" class="text-2xl font-bold">—</div></div>
+          <div class="stat"><div class="text-gray-400 text-sm">กุญแจฟื้นในช่วงเวลาที่เลือก</div><div id="periodKeys" class="text-2xl font-bold">—</div></div>
+          <div class="stat"><div class="text-gray-400 text-sm">กุญแจรวมวันนี้</div><div id="totalKeys" class="text-2xl font-bold">—</div></div>
           <div class="stat"><div class="text-gray-400 text-sm">รอบทั้งหมดที่เล่นได้</div><div id="totalRounds" class="text-2xl font-bold">—</div></div>
           <div class="stat"><div class="text-gray-400 text-sm">ฮีโร่ Lv30</div><div id="heroes" class="text-2xl font-bold">—</div></div>
           <div class="stat"><div class="text-gray-400 text-sm">Ruby จากฮีโร่</div><div id="rubyFromHeroes" class="text-2xl font-bold">—</div></div>
-          <div class="stat"><div class="text-gray-400 text-sm">Ruby ที่จ่าย (ซื้อคีย์)</div><div id="rubyCost" class="text-2xl font-bold">—</div></div>
+          <div class="stat"><div class="text-gray-400 text-sm">Ruby ที่จ่าย (ซื้อกุญแจ)</div><div id="rubyCost" class="text-2xl font-bold">—</div></div>
           <div class="stat"><div class="text-gray-400 text-sm">กำไรสุทธิ</div><div id="profit" class="text-2xl font-bold">—</div></div>
-          <div class="stat"><div class="text-gray-400 text-sm">คีย์ที่ใช้ / เหลือ</div><div id="keysUse" class="text-2xl font-bold">—</div></div>
+          <div class="stat"><div class="text-gray-400 text-sm">กุญแจที่ใช้ / เหลือ</div><div id="keysUse" class="text-2xl font-bold">—</div></div>
           <div class="stat"><div class="text-gray-400 text-sm">รอบที่ใช้ / เหลือ</div><div id="roundUse" class="text-2xl font-bold">—</div></div>
           <div class="stat"><div class="text-gray-400 text-sm">เวลารวมที่ใช้ (ชั่วโมง)</div><div id="totalHours" class="text-2xl font-bold">—</div></div>
           <div class="stat"><div class="text-gray-400 text-sm">เวลารวมที่ใช้ (ชั่วโมง:นาที)</div><div id="totalTimeFormatted" class="text-2xl font-bold">—</div></div>
@@ -243,8 +243,8 @@ app.get("/", (_req, res) => {
     </div>
 
     <p class="mt-6 text-gray-400 text-sm">
-      เคล็ดลับ: ด่านพิเศษให้ตั้งคีย์/รอบ = 12 และฮีโร่/รอบ = 8. ถ้าติ๊กแพ็ค "ลดเวลาฟื้นคีย์ 60 วิ"
-      ระบบจะคำนวณคีย์ฟรี/วันจาก 3 นาที/ดอก → 2 นาที/ดอก อัตโนมัติ.
+      เคล็ดลับ: ด่านพิเศษให้ตั้งกุญแจ/รอบ = 12 และฮีโร่/รอบ = 8. ถ้าติ๊กแพ็ค "ลดเวลาฟื้นกุญแจ 60 วิ"
+      ระบบจะคำนวณกุญแจฟรี/วันจาก 3 นาที/ดอก → 2 นาที/ดอก อัตโนมัติ.
     </p>
   </div>
 
@@ -396,5 +396,5 @@ app.get("/", (_req, res) => {
 });
 
 app.listen(PORT, () => {
-    console.log("Farm Simulator running at http://localhost:" + PORT);
+  console.log("Farm Simulator running at http://localhost:" + PORT);
 });
