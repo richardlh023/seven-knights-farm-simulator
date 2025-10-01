@@ -13,30 +13,30 @@ const SECS_PER_DAY = 24 * 60 * 60;
 const DEFAULTS = {
   expToLv30: 12480,          // EXP รวมจาก Lv1 -> Lv30
   rubyPerHeroLv30: 20,       // รูบี้/ฮีโร่เวล 30
-    keyRegenIntervalSec: 180,  // ฟื้น 1 กุญแจ ทุก 3 นาที (ฐาน)
-    keyPackReduceSec: 60,      // แพ็คลดเวลาฟื้นกุญแจ 60 วิ
+  keyRegenIntervalSec: 180,  // ฟื้น 1 กุญแจ ทุก 3 นาที (ฐาน)
+  keyPackReduceSec: 60,      // แพ็คลดเวลาฟื้นกุญแจ 60 วิ
 };
 
 /** Core simulate */
 function simulate({
-    keysBase = 0,                // กุญแจที่มีเริ่มต้น
-    keysPerRound = 6,           // กุญแจ/รอบ (ด่านปกติ 6, ด่านพิเศษ 12)
+  keysBase = 0,                // กุญแจที่มีเริ่มต้น
+  keysPerRound = 6,           // กุญแจ/รอบ (ด่านปกติ 6, ด่านพิเศษ 12)
   expPerRound = 1250,         // EXP/รอบ
   heroesPerRound = 4,         // จำนวนฮีโร่ที่ปั้นพร้อมกัน/รอบ
   expToLv30 = DEFAULTS.expToLv30,
   rubyPerHeroLv30 = DEFAULTS.rubyPerHeroLv30,
 
-    // ซื้อแพ็กกุญแจ
-    buy50Times = 0,             // 0–20
-    buy80Times = 0,             // 0–50
-    buy100Times = 0,            // 0–50
+  // ซื้อแพ็กกุญแจ
+  buy50Times = 0,             // 0–20
+  buy80Times = 0,             // 0–50
+  buy100Times = 0,            // 0–50
 
   // แพ็ครายเดือนแบบติ๊ก
   hasMonthlyExp10 = false,    // EXP +10%
-    hasMonthlyKeyMinus60 = false, // ลดเวลาฟื้นกุญแจ 60 วิ
+  hasMonthlyKeyMinus60 = false, // ลดเวลาฟื้นกุญแจ 60 วิ
 
-    // ตั้งค่าระยะเวลาฟื้น (กรณีอยากลองค่าอื่น)
-    baseKeyRegenIntervalSec = DEFAULTS.keyRegenIntervalSec,
+  // ตั้งค่าระยะเวลาฟื้น (กรณีอยากลองค่าอื่น)
+  baseKeyRegenIntervalSec = DEFAULTS.keyRegenIntervalSec,
 
   // เวลาเฉลี่ย/รอบ
   avgTimePerRound = 30,       // วินาที/รอบ
@@ -47,19 +47,19 @@ function simulate({
   // 2) รอบที่ต้องใช้จนเลเวล 30 (ปัดขึ้น)
   const roundsToLv30 = Math.max(1, Math.ceil(expToLv30 / effectiveExpPerRound));
 
-    // 3) กุญแจฟรีต่อวันจากการฟื้น (มีผลจากแพ็คลด 60 วิ)
-    const regenInterval =
-        Math.max(1, baseKeyRegenIntervalSec - (hasMonthlyKeyMinus60 ? DEFAULTS.keyPackReduceSec : 0));
-    const dailyKeysFromRegen = Math.floor(SECS_PER_DAY / regenInterval);
+  // 3) กุญแจฟรีต่อวันจากการฟื้น (มีผลจากแพ็คลด 60 วิ)
+  const regenInterval =
+    Math.max(1, baseKeyRegenIntervalSec - (hasMonthlyKeyMinus60 ? DEFAULTS.keyPackReduceSec : 0));
+  const dailyKeysFromRegen = Math.floor(SECS_PER_DAY / regenInterval);
 
-    // 4) กุญแจจากการซื้อแพ็ก
+  // 4) กุญแจจากการซื้อแพ็ก
   const keysFrom50 = 60 * Math.max(0, Math.min(20, buy50Times));
   const keysFrom80 = 60 * Math.max(0, Math.min(50, buy80Times));
   const keysFrom100 = 60 * Math.max(0, Math.min(50, buy100Times));
   const rubyCost = 50 * Math.max(0, Math.min(20, buy50Times)) + 80 * Math.max(0, Math.min(50, buy80Times)) + 100 * Math.max(0, Math.min(50, buy100Times));
 
-    // 5) กุญแจรวมวันนี้
-    const totalKeys = keysBase + dailyKeysFromRegen + keysFrom50 + keysFrom80 + keysFrom100;
+  // 5) กุญแจรวมวันนี้
+  const totalKeys = keysBase + dailyKeysFromRegen + keysFrom50 + keysFrom80 + keysFrom100;
 
   // 6) คำนวณรอบ / ชุดปั้น
   const totalRounds = Math.floor(totalKeys / keysPerRound);
@@ -225,7 +225,6 @@ app.get("/", (_req, res) => {
         <div class="grid md:grid-cols-2 gap-3">
           <div class="stat"><div class="text-gray-400 text-sm">EXP/รอบ (หลังบัฟ)</div><div id="effExp" class="text-2xl font-bold">—</div></div>
           <div class="stat"><div class="text-gray-400 text-sm">รอบที่ต้องใช้จน Lv30</div><div id="roundsToLv30" class="text-2xl font-bold">—</div></div>
-          <div class="stat"><div class="text-gray-400 text-sm">กุญแจฟรี/วัน (จากการฟื้น)</div><div id="dailyKeys" class="text-2xl font-bold">—</div></div>
           <div class="stat"><div class="text-gray-400 text-sm">กุญแจฟื้นในช่วงเวลาที่เลือก</div><div id="periodKeys" class="text-2xl font-bold">—</div></div>
           <div class="stat"><div class="text-gray-400 text-sm">กุญแจรวมวันนี้</div><div id="totalKeys" class="text-2xl font-bold">—</div></div>
           <div class="stat"><div class="text-gray-400 text-sm">รอบทั้งหมดที่เล่นได้</div><div id="totalRounds" class="text-2xl font-bold">—</div></div>
@@ -347,7 +346,6 @@ app.get("/", (_req, res) => {
     // render
     document.getElementById('effExp').textContent = fmt(Math.round(effectiveExpPerRound));
     document.getElementById('roundsToLv30').textContent = fmt(roundsToLv30);
-    document.getElementById('dailyKeys').textContent = fmt(dailyKeysFromRegen) + " (interval " + regenInterval + "s)";
     document.getElementById('periodKeys').textContent = fmt(periodKeysFromRegen) + " (" + data.farmStartTime + " - " + data.farmEndTime + ")";
     document.getElementById('totalKeys').textContent = fmt(totalKeys);
     document.getElementById('totalRounds').textContent = fmt(totalRounds);
